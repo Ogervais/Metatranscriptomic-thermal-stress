@@ -1,6 +1,6 @@
 # Metatranscriptomic- red coral thermal stress 
 
-Analysis of metatranscriptomic during a thermal stress in red coral
+Pipeline used for the analysis in Functional stability of Spirochaetota symbionts in the precious octocoral Corallium rubrum under heat stress paper (link)
 
 ## Table of content
 * Description
@@ -13,7 +13,7 @@ Analysis of metatranscriptomic during a thermal stress in red coral
 
 ## Description
 
-The input for this analysis is paired-end reads of 150bp sequenced on Novaseq6000 from red coral RNA. 
+The input for this analysis was a paired-end reads of 150bp sequenced on Novaseq6000 from red coral RNA. 
 Analyses were made on conda environment.
 
 ## Software used
@@ -90,7 +90,7 @@ done
 
 ### 1.3 Removal of host RNA contamination
 
-The metatranscriptomic data were extracted from a host (coral tissue) so in order to remove any RNA belonging to the host and food we use the transcriptome of the red coral (XXXX), mussel (GCA_025215535.1 ) and artemia (GCA_019857095.1) with `bwa` (https://github.com/bwa-mem2/bwa-mem2). Alignment result were then tranform in bam file using `samtools` (https://www.htslib.org/). We only kept target reads that was not aligned with the host transcriptome. 
+The metatranscriptomic data were extracted from a host (coral tissue) so in order to remove any RNA belonging to the host and food we use the transcriptome of the red coral (https://doi.org/10.21203/rs.3.rs-4582739/v1), mussel (GCA_025215535.1) and artemia (GCA_019857095.1) with `bwa` (https://github.com/bwa-mem2/bwa-mem2). Alignment result were then tranform in bam file using `samtools` (https://www.htslib.org/). We only kept target reads that was not aligned with the host transcriptome. 
 
 ```
 #prepare database index
