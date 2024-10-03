@@ -1,0 +1,108 @@
+---
+title: "graph kegg completion"
+author: "Ogervais"
+date: "2024-10-02"
+output: html_document
+---
+
+#library needed
+```{r}
+library(tidyverse)
+library(viridis)
+```
+
+```{r setup, include=FALSE, echo=FALSE}
+require("knitr")
+opts_knit$set(root.dir = "D:/Project/3_Temperature_effect/gene_expression/exp2")
+```
+
+#Input
+```{r}
+kegg <- read.table('kegg_completion/spiro_bactero_module_completeness.tab', header = TRUE, sep = '\t')
+
+curated_names <- read.table("D:/Project/7_Database/KEGG_module_bacteria_.txt", header = FALSE, sep = "\t")
+
+kegg <- kegg %>% 
+  left_join(curated_names, by = c("module" = "V1"))
+```
+
+#formating table for graph
+```{r}
+data <- kegg %>%
+  filter(count_spiro != 0 | count_bactero != 0) %>%
+  filter(name != 'C10-C20 isoprenoid biosynthesis, non-plant eukaryotes', name != 'Fatty acid biosynthesis in mitochondria, fungi', name != 'C10-C20 isoprenoid biosynthesis, archaea', name != 'C5 isoprenoid biosynthesis, mevalonate pathway, archaea', name != 'C10-C20 isoprenoid biosynthesis, plants', name != 'Fatty acid biosynthesis in mitochondria, animals', name != 'Fatty acid biosynthesis in mitochondria, animals', name != 'C1-unit interconversion, eukaryotes', name != 'Heme biosynthesis, animals and fungi, glycine => heme', name != 'GABA biosynthesis, eukaryotes, putrescine => GABA') %>%
+  pivot_longer(cols = c(count_spiro, count_bactero), names_to = 'sample', values_to = 'completion') %>%
+  arrange(sample)
+data_all$name <- factor(data_all$name, levels = unique(data_all$name[order(data_all$pathway.group)]))
+data_all$sample <- fct_recode(data_all$sample,
+                              'Spiro' = 'count_spiro',
+                              'Bactero' = 'count_bactero')
+```
+
+#order module
+```{r}
+order_mod = c('Nitrate assimilation', 
+              'Vancomycin resistance, D-Ala-D-Lac type', 'Multidrug resistance, efflux pump MexCD-OprJ', 'Multidrug resistance, efflux pump MexAB-OprM', 'Multidrug resistance, efflux pump MdtEF-TolC', 'Multidrug resistance, efflux pump AdeABC', 'Multidrug resistance, efflux pump AcrEF-TolC', 'Cationic antimicrobial peptide (CAMP) resistance, protease PgtE', 
+              'Pertussis pathogenicity signature, T1SS',
+              'Trans-cinnamate degradation', 'Toluene degradation', 'Catechol ortho-cleavage', 'Catechol meta-cleavage', 'Benzoate degradation, benzoate => catechol / methylbenzoate => methylcatechol', 'Anthranilate degradation',
+              'Rebeccamycin biosynthesis', 'Pyrrolnitrin biosynthesis',
+              'Aurachin biosynthesis',
+              'dTDP-L-rhamnose biosynthesis',
+              'beta-Carotene biosynthesis',
+              'C5 isoprenoid biosynthesis', 'C10-C20 isoprenoid biosynthesis', 
+              'Ubiquinone biosynthesis', 'Thiamine biosynthesis, prokaryotes, AIR (+ DXP/tyrosine) => TMP/TPP', 'Tetrahydrofolate biosynthesis, mediated by ribA and trpF', 
+              'Tetrahydrofolate biosynthesis, mediated by PTPS', 'Tetrahydrofolate biosynthesis, GTP => THF', 'Siroheme biosynthesis','Pyridoxal-P biosynthesis, erythrose-4P => pyridoxal-P', 'Pimeloyl-ACP biosynthesis', 'Riboflavin biosynthesis', 'Pantothenate biosynthesis, valine/L-aspartate => pantothenate',
+              'NAD biosynthesis, aspartate', 'Molybdenum cofactor biosynthesis', 'Menaquinone biosynthesis, chorismate (+ polyprenyl-PP) => menaquinol', 'Heme biosynthesis, plants and bacteria, glutamate => heme',
+              'Coenzyme A biosynthesis', 'Cobalamin biosynthesis, cobyrinate a', 'C1-unit interconversion', 'Biotin biosynthesis, pimeloyl-ACP/CoA => biotin', 'Biotin biosynthesis, BioW pathway', 'Biotin biosynthesis, BioI pathway',
+              'KDO2-lipid A modification pathway', 'KDO2-lipid A biosynthesis, Raetz pathway, non-LpxL-LpxM type', 'KDO2-lipid A biosynthesis, Raetz pathway, LpxL-LpxM type', 'CMP-KDO biosynthesis', 'ADP-L-glycero-D-manno-heptose biosynthesis',
+              'Keratan sulfate degradation',
+              'Glutathione biosynthesis',
+              'Tyrosine degradation', 'Tyrosine biosynthesis, chorismate => HPP => tyrosine','Tryptophan metabolism', 'Tryptophan biosynthesis', 'Shikimate pathway', 'Phenylalanine biosynthesis, chorismate => phenylpyruvate => phenylalanine',
+              'Histidine degradation', 'Histidine biosynthesis', 
+              'Polyamine biosynthesis, arginine => agmatine => putrescine => spermidine', 'Polyamine biosynthesis, arginine => ornithine => putrescine', 'GABA biosynthesis, prokaryotes',
+              'Urea cycle', 'Proline biosynthesis', 'Ornithine biosynthesis, glutamate', 'Arginine biosynthesis, glutamate', 'Arginine biosynthesis, ornithine',
+              'Lysine degradation', 'Lysine biosynthesis, succinyl-DAP pathway', 'Lysine biosynthesis, DAP dehydrogenase pathway','Lysine biosynthesis, DAP aminotransferase pathway', 'Lysine biosynthesis, AAA pathway', 'Lysine biosynthesis, acetyl-DAP pathway', 
+              'Valine/isoleucine biosynthesis', 'Leucine degradation', 'Leucine biosynthesis','Isoleucine biosynthesis, threonine', 'Isoleucine biosynthesis, pyruvate',
+              'Methionine salvage pathway', 'Methionine degradation', 'Methionine biosynthesis', 'Ethylene biosynthesis', 'Cysteine biosynthesis, serine', 'Cysteine biosynthesis, methionine',
+              'Threonine biosynthesis', 'Serine biosynthesis', 'Ectoine biosynthesis',
+              'Pyrimidine ribonucleotide biosynthesis', 'Pyrimidine degradation, uracil => beta-alanine, thymine => 3-aminoisobutanoate', 'De novo pyrimidine biosynthesis',
+              'Purine degradation', 'Guanine ribonucleotide biosynthesis', 'Deoxyribonucleotide biosynthesis', 'De novo purine biosynthesis', 'Adenine ribonucleotide biosynthesis', 
+              'Triacylglycerol biosynthesis', 'Ketone body biosynthesis', 'Phosphatidylethanolamine (PE) biosynthesis, PA => PS => PE', 'Jasmonic acid biosynthesis', 
+              'Ergocalciferol biosynthesis', 'Cholesterol biosynthesis',
+              'Fatty acid biosynthesis', 'beta-Oxidation, peroxisome, VLCFA', 'beta-Oxidation, acyl-CoA synthesis', 'beta-Oxidation', 
+              'V/A-type ATPase', 'Succinate dehydrogenase', 'NADH:quinone oxidoreductase', 'F-type ATPase', 'Cytochrome o ubiquinol oxidase', 'Cytochrome bd ubiquinol oxidase', 'Cytochrome c oxidase, prokaryotes', 'Cytochrome c oxidase, cbb3-type', 'Cytochrome c oxidase',
+              'Cytochrome bc1 complex respiratory unit', 'Cytochrome bc1 complex',
+              'Anoxygenic photosystem II', 
+              'Thiosulfate oxidation by SOX complex', 'Dissimilatory sulfate reduction', 'Denitrification', 'Assimilatory sulfate reduction', 
+              'Dissimilatory nitrate reduction', 'Complete nitrification', 'Assimilatory nitrate reduction', 
+              'Methanogenesis, methylamine/dimethylamine/trimethylamine => methane','Methanogenesis, acetate => methane', 'Formaldehyde assimilation, xylulose monophosphate pathway', 'Formaldehyde assimilation, ribulose monophosphate pathway', 'Formaldehyde assimilation, serine pathway', 
+              'Reductive pentose phosphate cycle, ribulose-5P => glyceraldehyde-3P', 'Reductive pentose phosphate cycle, glyceraldehyde-3P => ribulose-5P', 'Reductive pentose phosphate cycle (Calvin cycle)',
+              'Reductive citrate cycle (Arnon-Buchanan cycle)', 'Reductive acetyl-CoA pathway (Wood-Ljungdahl pathway)', 'Phosphate acetyltransferase-acetate kinase pathway', 
+              'Incomplete reductive citrate cycle', 'Hydroxypropionate-hydroxybutylate cycle', 'Dicarboxylate-hydroxybutyrate cycle', 'CAM (Crassulacean acid metabolism), light', 
+              'CAM (Crassulacean acid metabolism), dark', 'C4-dicarboxylic acid cycle, phosphoenolpyruvate carboxykinase type', 'C4-dicarboxylic acid cycle, NAD - malic enzyme type', 
+              'C4-dicarboxylic acid cycle, NADP - malic enzyme type', '3-Hydroxypropionate bi-cycle',
+              "Propanoyl-CoA metabolism", 'Photorespiration', 'Nucleotide sugar biosynthesis', 'Methylaspartate cycle', 'Malonate semialdehyde pathway', 'Inositol phosphate metabolism', 'Glyoxylate cycle',
+              'Glucuronate pathway (uronate pathway)', 'Glycogen degradation', 'Glycogen biosynthesis', 'Galactose degradation', 'Ethylmalonyl pathway', 'D-Galacturonate degradation (bacteria)', 'D-Glucuronate degradation', 'D-galactonate degradation', 'Ascorbate degradation', 'Ascorbate biosynthesis',
+              'Trehalose biosynthesis', "Semi-phosphorylative Entner-Doudoroff pathway", 'Pyruvate oxidation', 'PRPP biosynthesis','Pentose phosphate pathway (Pentose phosphate cycle)', 'Pentose phosphate pathway',
+              'Glycolysis (Embden-Meyerhof pathway)', 'Glycolysis', 'Gluconeogenesis', 'Entner-Doudoroff pathway', 'Citrate cycle (TCA cycle)', 'Citrate cycle')
+
+order_mod_rev <- rev(order_mod)
+```
+
+#heatmap spirochaetota and bacteroidetes
+```{r}
+graph_all <- data_all %>%
+  mutate(name = fct_relevel(V2, order_mod)) %>%
+  ggplot(aes(sample, name)) + 
+  geom_tile(aes(fill = completion), color = 'black') +
+  theme_minimal() + 
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(size = 10, angle = 90, vjust = 0.5),
+        legend.position = 'right',  
+        legend.justification = 'bottom') +
+  scale_fill_viridis_c() 
+graph_all
+
+ggsave('graph/completion_rev_bactero_spiro.png', dpi = 500, height =8500, width = 3000, units = 'px')
+```

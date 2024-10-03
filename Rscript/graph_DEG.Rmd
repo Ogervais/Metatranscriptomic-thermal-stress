@@ -1,0 +1,340 @@
+---
+title: "Graph DEG"
+author: "Ogervais"
+date: "2024-10-01"
+output: html_document
+---
+
+#library needed
+```{r}
+library(tidyverse)
+library('EnhancedVolcano',warn.conflicts = FALSE, quietly=TRUE)
+library('viridis')
+library('ggpubr')
+library('scales')
+library('ggbreak')
+
+```
+
+```{r setup, include=FALSE, echo=FALSE}
+require("knitr")
+opts_knit$set(root.dir = "D:/Project/3_Temperature_effect/gene_expression/exp2")
+```
+
+#import table and modify name
+```{r}
+res_24 <- read.table("result/deseq2/15_vs_24_normalized_DE.txt", header = TRUE, sep = "\t", row.names = 1)
+
+res_24$taxonomy <- fct_recode(res_24$taxonomy,
+                              'Pseudomonadota' = 'Proteobacteria',
+                              'Actinomycetota' = 'Actinobacteria',
+                              'Bacillota' = 'Firmicutes',
+                              'Spirochaetota' = 'Spirochaetes',
+                              'Synergistota' = 'Synergistetes',
+                              'Verrucomicrobiota' = 'Verrucomicrobiae',
+                              'Chloroflexota' = 'Chloroflexi',
+                              'Bacteroidota' = 'Bacteroidetes')
+
+res_24_phylum <- read.table("result/deseq2/15_vs_24_normalized_DE.txt", header = TRUE, sep = "\t", row.names = 1)
+
+res_24_phylum$taxonomy <- fct_recode(res_24_phylum$taxonomy,
+                              'Other phylum' = 'Bacteria',
+                              'Acidobacteriota' = 'Acidobacteriia',
+                              'Actinomycetota' = 'Actinobacteria',
+                              'Actinomycetota' = 'Acidimicrobiia',
+                              'Actinomycetota' = 'Rubrobacteria',
+                              'Bacteroidota' = 'Bacteroidetes',
+                              'Chloroflexota' = 'Chloroflexi',
+                              'Chloroflexota' = 'Chloroflexia',
+                              'Bacillota' = 'Firmicutes',
+                              'Bacillota' = 'Bacilli',
+                              'Bacillota' = 'Clostridia',
+                              'Bacillota' = 'Negativicutes',
+                              'Deferribacterota' = 'Deferribacteres',
+                              'Spirochaetota' = 'Spirochaetes',
+                              'Synergistota' = 'Synergistetes',
+                              'Verrucomicrobiota' = 'Verrucomicrobiae',
+                              'Pseudomonadota' = 'Proteobacteria',
+                              'Pseudomonadota' = 'Acidithiobacillales',
+                              'Pseudomonadota' = 'Alphaproteobacteria',
+                              'Pseudomonadota' = 'Caulobacterales',
+                              'Pseudomonadota' = 'Rhodospirillales',
+                              'Pseudomonadota' = 'Sphingomonadales',
+                              'Pseudomonadota' = 'Betaproteobacteria',
+                              'Pseudomonadota' = 'Neisseriales',
+                              'Pseudomonadota' = 'Nitrosomonadales',
+                              'Pseudomonadota' = 'Rhodocyclales',
+                              'Pseudomonadota' = 'Deltaproteobacteria',
+                              'Pseudomonadota' = 'Epsilonproteobacteria',
+                              'Pseudomonadota' = 'Gammaproteobacteria',
+                              'Pseudomonadota' = 'Aeromonadales',
+                              'Pseudomonadota' = 'Chromatiales',
+                              'Pseudomonadota' = 'Legionellales',
+                              'Pseudomonadota' = 'Methylococcales',
+                              'Pseudomonadota' = 'Oceanospirillales',
+                              'Pseudomonadota' = 'Pasteurellales',
+                              'Pseudomonadota' = 'Thiotrichales',
+                              'Pseudomonadota' = 'Vibrionales',
+                              'Pseudomonadota' = 'Xanthomonadales',
+                              'Pseudomonadota' = 'Hydrogenophilales',
+                              'Thermodesulfobacteriota' = 'Thermodesulfobacteria',
+                              'Thermomicrobiota' = 'Thermomicrobia',
+                              'Thermotogota' = 'Thermotogae')
+```
+
+#Barplot representing phylum of bacteria differentially expressed 
+```{r}
+pal <- c('#555555', '#555555','#555555','#555555','#555555','#555555','#555555', '#555555', '#555555', '#555555', '#555555', '#555555',  '#555555', '#555555', '#555555', '#555555', '#555555', '#555555', '#555555', '#555555', '#555555', '#555555') 
+
+mutate(res_24_phylum, taxonomy = fct_relevel(taxonomy, 'Pseudomonadota', 'Bacteroidota', 'Other phylum', 'Bacillota', 'Actinomycetota', 
+                                             'Spirochaetota', 'Cyanobacteria', 'Planctomycetes', 'Chloroflexota', 'Verrucomicrobiota',
+                                             'Acidobacteriota', 'Thermotogota', 'Chlamydiae', 'Fusobacteria', 'Gemmatimonadetes',
+                                             'Chlorobi',  'Deferribacterota', 'Synergistota', 'Thermodesulfobacteriota', 'Thermomicrobiota' 
+                                           )) %>%
+ggplot(aes(x = taxonomy, fill = taxonomy)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.3),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(hjust =0.8)
+  ) +
+  ylab('Number of differentially \n expressed genes') +
+  scale_fill_manual(values = pal) + 
+  theme(legend.position='none') +
+  scale_y_break(breaks = c(200, 2000), scales = 0.5)
+
+
+#ggsave("graph/phylum_DE_normalized.png", dpi = 500, width = 2700, height = 1800, units = 'px')
+```
+
+#Barplot representing pseudomonadota class of bacteria differentially expressed
+```{r}
+res_24_pseudo <- read.table("result/deseq2/15_vs_24_normalized_DE.txt", header = TRUE, sep = "\t", row.names = 1)
+
+res_24_pseudo <- res_24_pseudo %>%
+  filter(grepl('Proteobacteria|Acidithiobacillales|Alphaproteobacteria|Caulobacterales|Rhodospirillales|Sphingomonadales|Betaproteobacteria|Neisseriales|Nitrosomonadales|Rhodocyclales|Deltaproteobacteria|Epsilonproteobacteria|Gammaproteobacteria|Aeromonadales|Chromatiales|Legionellales|Methylococcales|Oceanospirillales|Pasteurellales|Thiotrichales|Vibrionales|Xanthomonadales|Hydrogenophilales', taxonomy))
+
+res_24_pseudo$taxonomy <- fct_recode(res_24_pseudo$taxonomy,
+                              'Other Pseudomonadota' = 'Proteobacteria',
+                              'Other Alphaproteobacteria' = 'Alphaproteobacteria',
+                              'Other Betaproteobacteria' = 'Betaproteobacteria',
+                              'Other Gammaproteobacteria' = 'Gammaproteobacteria')
+
+pal2 <- c("#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", '#0bb4ff', '#0bb4ff', '#0bb4ff', '#0bb4ff', "#FF8C00", "#FF8C00", "#FF8C00", "#FF8C00", '#555555', '#555555', '#555555','#555555', '#555555') 
+
+mutate(res_24_pseudo, taxonomy = fct_relevel(taxonomy, 'Other Gammaproteobacteria', 'Vibrionales',
+                                             'Xanthomonadales', 'Oceanospirillales', 'Chromatiales', 'Thiotrichales', 'Methylococcales',
+                                             'Aeromonadales', 'Legionellales', 'Pasteurellales',   
+                                             'Other Alphaproteobacteria', 'Sphingomonadales', 'Rhodospirillales', 'Caulobacterales',
+                                             'Other Betaproteobacteria', 'Rhodocyclales', 'Neisseriales', 'Nitrosomonadales',
+                                             'Deltaproteobacteria',
+                                             'Other Pseudomonadota',
+                                             'Epsilonproteobacteria',
+                                             'Acidithiobacillales',
+                                             'Hydrogenophilales'
+                                              )) %>%
+ggplot(aes(x = taxonomy, fill = taxonomy)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.3, colour = pal2),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(hjust = 0.8)
+  ) +
+  ylab('Number of differentially \n expressed genes') +
+  scale_fill_manual(values = pal2) + 
+  theme(legend.position='none') +
+  scale_y_break(breaks = c(200, 400), scales = 0.5)
+
+
+#ggsave("graph/pseudomonodata_DE_normalized.png", dpi = 500, width = 2700, height = 1800, units = 'px')
+```
+
+##COG category analysis
+```{r}
+res_24_COG <- separate(res_24, eggNOG_OGs, into = c("COG", "other"), sep = "@")
+res_24_COG <- res_24_COG[,c(2,6,10,13,14)] 
+res_24_COG <- res_24_COG %>% 
+  filter( COG_category != "-") #filter line with '-' in COG column 
+
+res_24_COG_new <- res_24_COG %>%
+  separate_rows(COG_category, sep = '(?<=.)(?=.)') #regex lookaround
+
+res_24_COG_up <- res_24_COG_new %>% 
+  filter( log2FoldChange > 0) #filter line with value >0
+sum_24_COG_up <- res_24_COG_up %>%
+  group_by(COG_category) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+res_24_COG_down <- res_24_COG_new %>% 
+  filter( log2FoldChange < 0) #filter line with value <0
+sum_24_COG_down <- res_24_COG_down %>%
+  group_by(COG_category) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+count_COG <- data.frame(COG = c('B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'S', 'T', 'U', 'V', 'W', 'Z'),
+                        up = c('0', '130', '21', '120', '33', '82', '47', '71', '89', '59', '46', '85', '45', '46', '90', '52', '179', '87', '57', '23', '0', '2', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''),
+                        down = c('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1', '155', '32', '123', '49', '90', '61', '112', '238', '76', '99', '140', '32', '63', '82', '78', '242', '41', '71', '17', '3', '9'),
+                        group = c('up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down'))
+
+count_COG$up <- as.numeric(count_COG$up)
+count_COG$down <- as.numeric(count_COG$down)
+
+```
+#Graphic showing number of gene up or downregulated for each COG category
+```{r}
+COG_graph <- ggplot(count_COG, aes(y = COG, fill = group)) +
+  geom_bar(aes(x = up), stat = 'identity') +
+  geom_bar(aes(x = -down), stat = 'identity') +
+  scale_x_continuous(labels = abs) +
+  labs(x = "Count") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid = element_blank(),
+    axis.line.x = element_line(),
+    axis.line.y = element_line(),
+    legend.title = element_blank()) +
+  scale_fill_manual(values = c("#009dfe", "#fb3455")) +
+  scale_y_discrete(limits=rev)
+COG_graph
+
+#ggsave("D:/Project/3_Temperature_effect/gene_expression/exp2/graph/COG_DE_up_down_inversed.png", dpi = 500, width = 1700, height = 1900, units = 'px')
+
+```
+
+#graph with COG associated to it's phylum
+```{r}
+#import table with the name of COG category
+annot <- read.table("D:/Project/7_Database/COG_cat.csv", sep = ',', header = TRUE)
+res_24_COG_2 <- res_24_COG_new %>% 
+  left_join(annot, by = c("COG_category" = "COG"))
+
+res_24_COG_2$taxonomy <- fct_recode(res_24_COG_2$taxonomy,
+                              'Other phylum' = 'Bacteria',
+                              'Actinomycetota' = 'Acidimicrobiia',
+                              'Actinomycetota' = 'Rubrobacteria',
+                              'Bacillota' = 'Bacilli',
+                              'Bacillota' = 'Clostridia',
+                              'Other Pseudomonadota' = 'Pseudomonadota',
+                              'Other Alphaproteobacteria' = 'Alphaproteobacteria',
+                              'Other Betaproteobacteria' = 'Betaproteobacteria',
+                              'Other Gammaproteobacteria' = 'Gammaproteobacteria')
+
+#table with mean log2foldchange and count of taxonomy x COG_category
+summarise_data <- res_24_COG_2 %>%
+  group_by(taxonomy, category) %>%
+  summarise(mean_log2FoldChange = mean(log2FoldChange), Count = n())
+
+#remove unwanted taxa
+summarise_data <- summarise_data %>%
+  filter(grepl('Other phylum|Actinomycetota|Bacteroidota|Bacillota|Other Pseudomonadota|Alphaproteobacteria|Rhodospirillales|Sphingomonadales|Other Betaproteobacteria|Deltaproteobacteria|Gammaproteobacteria|Chromatiales|Methylococcales|Oceanospirillales|Thiotrichales|Vibrionales|Xanthomonadales|Spirochaetota', taxonomy))
+
+#write.table(summarise_data, file="result/Supplementary_COG.txt", sep="\t", row.names = FALSE)
+order_tax <- c('Other phylum','Actinomycetota','Bacteroidota','Chlorobi', 'Cyanobacteria','Bacillota', 'Other Pseudomonadota', 'Acidithiobacillales', 'Other Alphaproteobacteria', 'Caulobacterales', 'Rhodospirillales', 'Sphingomonadales', 'Other Betaproteobacteria', 'Deltaproteobacteria', 'Epsilonproteobacteria', 'Other Gammaproteobacteria', 'Aeromonadales', 'Chromatiales', 'Legionellales', 'Methylococcales', 'Oceanospirillales', 'Pasteurellales', 'Thiotrichales', 'Vibrionales', 'Xanthomonadales', 'Spirochaetota')
+
+pal <- c('#555555', '#555555', '#555555', '#555555','#555555', '#0bb4ff', '#0bb4ff', '#0bb4ff', "#FF8C00", '#555555', "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", "#A034F0", '#555555') 
+
+#create the bubble plot
+graph_COG_taxa <- mutate(summarise_data, taxonomy = fct_relevel(taxonomy, order_tax)) %>%
+ggplot(aes(x = taxonomy, y = category, color = mean_log2FoldChange, size = Count)) +
+  geom_point() +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_text(size = 12, colour = pal),
+    axis.text.y = element_text(size = 12),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 11)) + 
+  rotate_x_text() +
+  scale_y_discrete(limits = rev, labels = label_wrap(40)) +
+  scale_x_discrete(labels = label_wrap(15)) +
+  scale_color_viridis(option="A") + 
+  labs(color= bquote("Mean "~Log[2]*" FC"),
+       size = 'Number of genes')
+
+graph_COG_taxa
+
+#ggsave("D:/Project/3_Temperature_effect/gene_expression/exp2/graph/bubble_COG_foldchange_count_phylum_normalized.png", dpi = 500, width = 5500, height = 5200, units = 'px')
+```
+
+#KEGG analysis
+```{r}
+#modify file and kept only KEGG
+data <- res_24 %>%
+  select(log2FoldChange, taxonomy, KEGG_Module) %>%
+  mutate_all(~ ifelse(. == '-', NA, .)) 
+
+# Split the "KEGG_Module" column by ','
+data_new <- data %>%
+  separate_rows(KEGG_Module, sep = ",")
+
+#read names of modules
+curated_names <- read.table("D:/Project/7_Database/KEGG_module_bacteria_.txt", header = FALSE, sep = "\t")
+
+sel.gmm <- subset(curated_names, V1 %in% unique(data_new$KEGG_Module))
+
+global.table <- data_new %>% 
+  left_join(sel.gmm, by = c("KEGG_Module" = "V1"))
+colnames(global.table) <- c("log2FoldChange", "taxonomy", "Module", "Names", "Category")
+global.table <- na.omit(global.table)
+
+res_24_KEGG_up <- global.table %>% 
+  filter( log2FoldChange > 0) #filter line with value >0
+sum_24_KEGG_up <- res_24_KEGG_up %>%
+  group_by(Category) %>%
+  summarise(count_up = n()) %>%
+  ungroup()
+
+
+res_24_KEGG_down <- global.table %>% 
+  filter( log2FoldChange < 0) #filter line with value <0
+sum_24_KEGG_down <- res_24_KEGG_down %>%
+  group_by(Category) %>%
+  summarise(count_down = n()) %>%
+  ungroup()
+
+
+order_cat = c('Metabolic capacity', 'Symbiosis', 'Drug resistance', 'Aromatics degradation', 'Biosynthesis of other bacterial compounds', 
+              'Polyketide sugar unit biosynthesis', 'Terpenoid backbone biosynthesis', 'Cofactor and vitamin metabolism', 'Lipopolysaccharide metabolism',
+              'Glycosaminoglycan metabolism', 'Other amino acid metabolism', 'Aromatic amino acid metabolism', 'Histidine metabolism', 
+              'Polyamine biosynthesis', 'Arginine and proline metabolism', 'Lysine metabolism', 'Branched-chain amino acid metabolism', 
+              'Cysteine and methionine metabolism', 'Serine and threonine metabolism', 'Pyrimidine metabolism', 'Purine metabolism', 
+              'Lipid metabolism', 'Fatty acid metabolism','ATP synthesis', 'Photosynthesis', 'Sulfur metabolism', 'Nitrogen metabolism', 
+              'Methane metabolism', 'Carbon fixation', "Other carbohydrate metabolism", "Central carbohydrate metabolism") 
+
+data_KEGG <- sum_24_KEGG_up %>%
+  full_join(sum_24_KEGG_down, by = 'Category') %>%
+  mutate(Category = fct_relevel(Category, order_cat))
+
+KEGG_graph <- ggplot(data_KEGG, aes(y = Category)) +
+  geom_bar(aes(x = count_up, fill = "count_up"), stat = 'identity') +
+  geom_bar(aes(x = -count_down, fill = "count_down"), stat = 'identity') +
+  scale_x_continuous(labels = abs) +
+  labs(x = "Count") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid = element_blank(),
+    axis.line.x = element_line(),
+    axis.line.y = element_line(),
+    legend.title = element_blank()) +
+  scale_fill_manual(values = c(count_up = "#fb3455", count_down = "#009dfe"), labels = c('down', 'up')) 
+KEGG_graph
+
+#ggsave("D:/Project/3_Temperature_effect/gene_expression/exp2/graph/KEGG_DE_up_down.png", dpi = 500, width = 3000, height = 1900, units = 'px')
+
+```
+
+#associate graph for article
+```{r}
+COG_graph <-COG_graph + theme(legend.position = "none")
+(COG_graph + labs(tag = 'A') | KEGG_graph + labs(tag = 'B'))
+
+```
