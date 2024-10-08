@@ -1,9 +1,7 @@
----
-title: "Differential gene expression"
-author: "Ophelie Gervais"
-date: "31/01/24"
+#title: "Differential gene expression"
+#author: "Ophelie Gervais"
+#date: "31/01/24"
 
----
   
 #Test Deseq2 after previous normalisation taxa
 
@@ -15,6 +13,9 @@ library("RColorBrewer")
 library("pheatmap")
 library("ggplotify")
 library('gridExtra')
+
+#used df_filtered from the normalization.R script
+source("D:/Project/3_Temperature_effect/R_script/Github_script/Normalization.R")
 
 # Convert to matrix
 countdata <- as.matrix(df_filtered)
