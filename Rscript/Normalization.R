@@ -1,9 +1,7 @@
----
-title: "Test normalisation data metatranscriptomic"
-author: "Ophelie Gervais"
-date: "29/01/24"
+#title: "Test normalisation data metatranscriptomic"
+#author: "Ophelie Gervais"
+#date: "29/01/24"
 
----
   
   
 #### Library --------------------------------------------------------------------------------
