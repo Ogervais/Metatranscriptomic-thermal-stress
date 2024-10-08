@@ -1,8 +1,6 @@
----
-title: "KEGG heatmap"
-author: "Ophelie Gervais"
-date: "31/01/24"
----
+#title: "KEGG heatmap"
+#author: "Ophelie Gervais"
+#date: "31/01/24"
   
 #### Library --------------------------------------------------------------------------------
 
