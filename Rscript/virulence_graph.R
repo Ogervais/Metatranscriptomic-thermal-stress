@@ -1,8 +1,6 @@
----
-title: "virulence graph"
-author: "Ophelie Gervais"
-date: "9/07/24"
----
+#title: "virulence graph"
+#author: "Ophelie Gervais"
+#date: "9/07/24"
 
 #### Library --------------------------------------------------------------------------------
 library('tidyverse')
