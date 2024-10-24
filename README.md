@@ -177,20 +177,22 @@ rRNA genes were partially remove during the wetlab protocol but because they are
 OUTPUT=./sortmerna
 DATABASE=./database/rRNA/
 
-for f in *_R1_trimmed.fastq.gz
+for f in *_host_removed_R1.fastq.gz
 
 do
-n=${f%%_R1_trimmed.fastq.gz}
+n=${f%%_host_removed_R1.fastq.gz}
 sortmerna \
+    -ref ${DATABASE}/smr_v4.3_default_db.fasta \
+    -ref ${DATABASE}/smr_v4.3_fast_db.fasta \
     -ref ${DATABASE}/smr_v4.3_sensitive_db.fasta \
     -ref ${DATABASE}/smr_v4.3_sensitive_db_rfam_seeds.fasta \
-    -reads ${n}_R1_trimmed.fastq.gz\ 
-    -reads ${n}_R2_trimmed.fastq.gz \ 
+    -reads ${n}_host_removed_R1.fastq.gz\ 
+    -reads ${n}_host_removed_R2.fastq.gz \ 
     -fastx \ 
     -paired_in \ 
     -out2 \ 
-    -aligned rRNA_reads \ 
-    -other non_rRNA_reads \ 
+    -aligned ${OUTPUT}/${n}_rRNA_reads \ 
+    -other ${OUTPUT}/${n}_non_rRNA_reads \ 
     -workdir ${HOME}/ \
     -threads 60 
 done
